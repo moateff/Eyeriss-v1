@@ -53,8 +53,8 @@ module pe_array #(
     
     //-------------------------------------------IFMAP-----------------------------------------------------\\
     input  logic [DATA_WIDTH_IFMAP - 1:0] ifmap_to_gin,
-    input  logic                        push_ifmap_to_gin,
-    output logic                        ifmap_gin_fifo_full,
+    input  logic                          push_ifmap_to_gin,
+    output logic                          ifmap_gin_fifo_full,
     
     input  logic [ROW_TAG_WIDTH_IFMAP - 1:0] ifmap_row_tag,
     input  logic [COL_TAG_WIDTH_IFMAP - 1:0] ifmap_col_tag,
