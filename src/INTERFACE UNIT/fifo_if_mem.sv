@@ -1,4 +1,4 @@
-module fifo_mem #(parameter FIFO_WIDTH = 64, DEPTH = 16, FIFO_ADDR_WIDTH = $clog2 (DEPTH))
+module fifo_if_mem #(parameter FIFO_WIDTH = 64, DEPTH = 16, FIFO_ADDR_WIDTH = $clog2 (DEPTH))
 (
     input wire 	wclk,
 	input wire  reset,

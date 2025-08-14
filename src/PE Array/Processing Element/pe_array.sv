@@ -53,8 +53,8 @@ module pe_array #(
     
     //-------------------------------------------IFMAP-----------------------------------------------------\\
     input  logic [DATA_WIDTH_IFMAP - 1:0] ifmap_to_gin,
-    input  logic                        push_ifmap_to_gin,
-    output logic                        ifmap_gin_fifo_full,
+    input  logic                          push_ifmap_to_gin,
+    output logic                          ifmap_gin_fifo_full,
     
     input  logic [ROW_TAG_WIDTH_IFMAP - 1:0] ifmap_row_tag,
     input  logic [COL_TAG_WIDTH_IFMAP - 1:0] ifmap_col_tag,
@@ -135,7 +135,7 @@ module pe_array #(
     //------------------------------------------PE ARRAY----------------------------------------\\
     genvar i, j;
     generate
-        for (i = 0; i < NUM_OF_ROWS; i++) begin : row
+        for (i = 0; i < NUM_OF_ROWS; i = i + 1) begin : row
             scan_ff_Nbit #(.N(NUM_OF_COLS)) pe_array_enable_ff (
                 .clk(clk),
                 .reset(reset),
@@ -163,7 +163,7 @@ module pe_array #(
                 .so(scan_w_opsum_ln_sel[i+1])
             );
             
-            for (j = 0; j < NUM_OF_COLS; j++) begin : col
+            for (j = 0; j < NUM_OF_COLS; j = j + 1) begin : col
                 pe_wrapper #(
                     .DATA_WIDTH(DATA_WIDTH),
                     

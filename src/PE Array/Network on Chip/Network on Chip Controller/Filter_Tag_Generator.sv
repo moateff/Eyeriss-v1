@@ -26,7 +26,7 @@ module Filter_Tag_Generator
     logic [r_WIDTH - 1:0] r_crnt, r_nxt;  
     logic [t_WIDTH - 1:0] t_crnt, t_nxt; 
 
-    always_ff @(negedge clk or posedge reset) begin
+    always @(negedge clk or posedge reset) begin
         if (reset) begin
             state_crnt <= IDLE;
             R_crnt <= 0;
@@ -40,7 +40,7 @@ module Filter_Tag_Generator
         end
     end
 
-    always_comb begin
+    always @(*) begin
         // Default assignments    
         state_nxt = state_crnt;
         R_nxt = R_crnt;
@@ -84,7 +84,7 @@ module Filter_Tag_Generator
         endcase
     end
 
-    always_comb begin
+    always @(*) begin
          col_tag = t_crnt + r_crnt * 2;
          row_tag = R_crnt;
     end

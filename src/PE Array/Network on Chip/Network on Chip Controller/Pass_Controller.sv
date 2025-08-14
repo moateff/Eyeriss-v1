@@ -1,25 +1,3 @@
-`timescale 1ns / 1ps
-//////////////////////////////////////////////////////////////////////////////////
-// Company: 
-// Engineer: 
-// 
-// Create Date: 03/09/2025 03:38:30 AM
-// Design Name: 
-// Module Name: Pass_Controller
-// Project Name: 
-// Target Devices: 
-// Tool Versions: 
-// Description: 
-// 
-// Dependencies: 
-// 
-// Revision:
-// Revision 0.01 - File Created
-// Additional Comments:
-// 
-//////////////////////////////////////////////////////////////////////////////////
-
-
 module Pass_Controller (
     input clk,
     input reset,
@@ -35,7 +13,7 @@ module Pass_Controller (
     typedef enum {IDLE, START_NOCS, PROCESSING, DONE} state_type;
     state_type state_nxt, state_crnt;
     
-    always_ff @(negedge clk or posedge reset) begin
+    always @(negedge clk or posedge reset) begin
         if (reset) begin
             state_crnt <= IDLE;
         end else begin
@@ -43,7 +21,7 @@ module Pass_Controller (
         end
     end
     
-    always_comb begin
+    always @(*) begin
         // Default assignments
         start_nocs = 1'b0;
         busy = 1'b0;

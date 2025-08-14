@@ -1,6 +1,8 @@
 package file_pkg;
 import shared_pkg::*;
     
+    // compare_files(filename1, filename2, num_words);
+
     task compare_files(
         input string filename1, 
         input string filename2, 
@@ -16,7 +18,7 @@ import shared_pkg::*;
     
         file1 = $fopen(filename1, "r");
         file2 = $fopen(filename2, "r");
-        logfile = $fopen("D:/data/Graduation Project/GP_AlexNet/Results/Conv1/ofmap/log.txt", "w");
+        logfile = $fopen(".../log.txt", "w");
     
         if (file1 == 0 || file2 == 0) begin
             $display("[ERROR] Could not open one or both files.");

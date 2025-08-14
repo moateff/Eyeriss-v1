@@ -1,4 +1,4 @@
-module NoC_TOP
+module noc_top
 #(
     parameter H_WIDTH = 8,
     parameter W_WIDTH = 8,
@@ -61,10 +61,7 @@ module NoC_TOP
     input [q_WIDTH - 1:0] q,
     input [r_WIDTH - 1:0] r,
     input [t_WIDTH - 1:0] t,
-    
-    input [m_WIDTH - 1:0] psum_channel_base,
-    input [E_WIDTH - 1:0] psum_row_base,
-    
+        
     input ifmap_gin_fifo_full,
     input filter_gin_fifo_full,
     input ipsum_gin_fifo_full,
@@ -129,7 +126,7 @@ module NoC_TOP
         .done(done)
     );
 
-    NoC_Controller #(
+    noc_controller #(
         .H_WIDTH(H_WIDTH),
         .W_WIDTH(W_WIDTH),
         .R_WIDTH(R_WIDTH),
@@ -199,10 +196,7 @@ module NoC_TOP
         .filter_re_from_glb(filter_re_from_glb),
         .ipsum_re_from_glb(ipsum_re_from_glb),
         .opsum_we_to_glb(opsum_we_to_glb),
-    
-        .psum_channel_base(psum_channel_base),
-        .psum_row_base(psum_row_base),
-    
+                
         .ifmap_glb_addr(ifmap_glb_addr),
         .filter_glb_addr(filter_glb_addr),
         .ipsum_glb_addr(ipsum_glb_addr),

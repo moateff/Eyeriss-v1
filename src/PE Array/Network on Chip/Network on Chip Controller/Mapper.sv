@@ -29,14 +29,14 @@ module mapper #(
     // Compute the address based on row-major or column-major order, with base address input
     generate
         if (ROW_MAJOR) begin : row_major_block
-            always_comb begin
+            always @(*) begin
                 addr = (idx4 * (dim3 * dim2 * dim1)) +
                        (idx3 * (dim2 * dim1)) +
                        (idx2 * dim1) +
                         idx1;
             end
         end else begin : column_major_block
-            always_comb begin
+            always @(*) begin
                 addr = (idx4 * (dim3 * dim2 * dim1)) +
                        (idx3 * (dim2 * dim1)) +
                        (idx1 * dim2) +

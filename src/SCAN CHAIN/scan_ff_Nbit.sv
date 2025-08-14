@@ -13,7 +13,7 @@ module scan_ff_Nbit #(parameter N = 4)(
         
     genvar i;
     generate
-    for (i = N-1 ; i >= 0 ; i--) begin : SCAN_CHAIN
+    for (i = N - 1; i >= 0; i = i - 1) begin : SCAN_CHAIN
         scan_ff scan_ff_inst (
             .clk(clk),          // Connect clock
             .reset(reset),      // Connect async reset

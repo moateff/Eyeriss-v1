@@ -292,7 +292,7 @@ module pe
     );
     
     truncator #(.DATA_WIDTH(DATA_WIDTH)) truncator_inst (
-        .sel('b0),
+        .sel(5'b0),
         .in(mul_result),
         .out(truncated_result)
     );

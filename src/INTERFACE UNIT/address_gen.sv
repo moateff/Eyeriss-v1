@@ -1,4 +1,4 @@
-module address_generator #(parameter ADDR_WIDTH = 20)
+module address_generator #(parameter ADDR_WIDTH = 16)
 (
     input wire        core_clk,
     input wire        reset,

@@ -13,7 +13,6 @@ import file_pkg::*;
         bit [FIFO_WIDTH-1:0] word;
         wait_core_cycle(1);
 
-        shared_pkg::base_addr = base_addr_t;
         shared_pkg::words_num = words_num_t;
         shared_pkg::transfer_type = transfer_type_t;
         
@@ -42,7 +41,7 @@ import file_pkg::*;
         shared_pkg::valid_from_dram = 0;
         
         $fclose(file);
-        wait(shared_pkg::forward_transfer_done);
+        wait(shared_pkg::transfer_done);
     endtask
 	
 	/*
@@ -71,7 +70,7 @@ import file_pkg::*;
 
 		$fclose(file);
 
-        wait (back_transfer_done);
+        wait (shared_pkg::transfer_done);
     endtask
 	*/
 	     

@@ -11,14 +11,11 @@ module INTERFACE_UNIT #(
 
     // FIFO control
     input  wire [ADDR_WIDTH-1:0] words_num,
-    input  wire [ADDR_WIDTH-1:0] base_address,
-    output wire                  Direct_Back_Path,
 
     // GLB
     // forward
     input  wire                  start_forward,
     input  wire [1:0]            ifmap_filter_bias_transfer,
-    output wire                  for_transfer_done,
     
     output wire                  w_en_ifmap_GLB,
     output wire [FIFO_WIDTH-1:0] rdata_to_ifmap_GLB,
@@ -37,7 +34,8 @@ module INTERFACE_UNIT #(
     output wire                  r_en_GLB,
     input  wire [FIFO_WIDTH-1:0] wdata_from_GLB,
     output wire [ADDR_WIDTH-1:0] raddr_from_GLB,
-    output wire                  back_transfer_done,
+    
+    output wire                  transfer_done,
 
     // DRAM
     // forward
@@ -53,10 +51,13 @@ module INTERFACE_UNIT #(
     wire       ifmap_transfer_done;
     wire       filter_transfer_done;
     wire       bias_transfer_done;
-
+    wire       for_transfer_done;
+    wire       back_transfer_done;
+    
     assign for_transfer_done = ifmap_transfer_done | filter_transfer_done | bias_transfer_done;
-
-    wire       Direct_Back_Path_;
+    assign transfer_done = for_transfer_done | back_transfer_done;
+    
+    wire       Direct_Back_Path;
     wire       [1:0] ifmap_filter;
     wire       ifmap_bias;
     wire       read_from_DRAM;
@@ -70,6 +71,9 @@ module INTERFACE_UNIT #(
 	wire       wfull;
     wire       transfer;
     
+    wire [ADDR_WIDTH-1:0] base_address;
+    
+    assign base_address = 0;
 
 	RST_SYNC U_RST_core
 	(
@@ -85,12 +89,12 @@ module INTERFACE_UNIT #(
 	.SYNC_RST(link_reset)
 	);
 
-	clk_mux U_CLK_MUX 
+	clk_mux U_CLK_MUX_1 
 	(
 	.link_clk(link_clk),      
     .core_clk(core_clk),  
     .enable(transfer),     
-    .Direct_Back_Path(Direct_Back_Path_),        
+    .Direct_Back_Path(Direct_Back_Path),        
     .reset(reset),        
     .clk_out(wclk) 	
 	);
@@ -101,7 +105,7 @@ module INTERFACE_UNIT #(
 	.link_clk(link_clk),      
     .core_clk(core_clk),  
     .enable(transfer),     
-    .Direct_Back_Path(~Direct_Back_Path_),        
+    .Direct_Back_Path(~Direct_Back_Path),        
     .reset(reset),        
     .clk_out(rclk) 	
 	);
@@ -117,7 +121,7 @@ module INTERFACE_UNIT #(
         .valid_from_DRAM(valid_from_DRAM),
         .start_backward(start_backward),
 		.wfull(wfull),
-        .Direct_Back_Path(Direct_Back_Path_),
+        .Direct_Back_Path(Direct_Back_Path),
         .ifmap_filter(ifmap_filter),
         .ifmap_bias(ifmap_bias),
         .read_from_DRAM(read_from_DRAM),
@@ -139,7 +143,7 @@ module INTERFACE_UNIT #(
         .core_clk(core_clk),
         .reset(reset),
         .core_reset(core_reset),
-        .Direct_Back_Path(Direct_Back_Path_),
+        .Direct_Back_Path(Direct_Back_Path),
         .rinc_to_GLB(rinc_to_GLB),
         .ifmap_filter(ifmap_filter),
         .ifmap_bias(ifmap_bias),
@@ -169,7 +173,5 @@ module INTERFACE_UNIT #(
         .write_address_to_bias_GLB(write_address_to_bias_GLB),
 		.transfer(transfer)
     );
-
-    assign Direct_Back_Path = Direct_Back_Path_;
 
 endmodule

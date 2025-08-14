@@ -24,7 +24,7 @@ module psum_spad
         end
     end
     
-    always @(negedge clk) begin
+    always @(posedge clk) begin
         dout <= mem[r_addr];
     end
                 

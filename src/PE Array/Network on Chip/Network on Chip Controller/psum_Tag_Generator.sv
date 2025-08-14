@@ -31,7 +31,7 @@ module Psum_Tag_Generator
     assign num_of_rows = (e * t + 13) >> 4;
     assign num_of_cols = 14;
     
-    always_ff @(negedge clk or posedge reset) begin
+    always @(negedge clk or posedge reset) begin
         if (reset) begin
             state_crnt <= IDLE;
             col_crnt <= 0;
@@ -45,7 +45,7 @@ module Psum_Tag_Generator
         end
     end
 
-    always_comb begin
+    always @(*) begin
         // Default assignments
         busy = 1'b0;    
         state_nxt = state_crnt;
@@ -106,7 +106,7 @@ module Psum_Tag_Generator
         endcase
     end
 
-    always_comb begin
+    always @(*) begin
          col_tag = col_crnt;
          row_tag = row_crnt;
     end

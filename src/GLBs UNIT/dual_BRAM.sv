@@ -1,6 +1,6 @@
-module dual_RAM #(parameter DATA_WIDTH = 16, DEPTH = 4, ADDR = $clog2(DEPTH))
+module dual_BRAM #(parameter DATA_WIDTH = 16, DEPTH = 4, ADDR = $clog2(DEPTH))
 (
-    input wire core_clk,
+    input wire clk,
 		
 	//port A
 	
@@ -25,7 +25,7 @@ module dual_RAM #(parameter DATA_WIDTH = 16, DEPTH = 4, ADDR = $clog2(DEPTH))
 	
 	// PORT A
 	
-	always @(negedge core_clk)
+	always @(negedge clk)
 	begin
 			if (we_a)
 				mem[addr_a] <= wdata_a;
@@ -36,7 +36,7 @@ module dual_RAM #(parameter DATA_WIDTH = 16, DEPTH = 4, ADDR = $clog2(DEPTH))
 	
 	// PORT B
 	
-	always @(negedge core_clk)
+	always @(negedge clk)
 	begin
 			if (we_b)
 				mem[addr_b] <= wdata_b;

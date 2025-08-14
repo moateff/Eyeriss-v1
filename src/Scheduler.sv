@@ -1,9 +1,12 @@
-module Scheduler #(
+module scheduler #(
+    parameter E_WIDTH = 6,
     parameter C_WIDTH = 10,
     parameter M_WIDTH = 10,
     parameter N_WIDTH = 3,
     
+    parameter m_WIDTH = 6,
     parameter n_WIDTH = 3,
+    parameter e_WIDTH = 6,
     parameter p_WIDTH = 5,
     parameter q_WIDTH = 3,
     parameter r_WIDTH = 2,
@@ -12,20 +15,27 @@ module Scheduler #(
     input  logic clk,
     input  logic reset,    
     input  logic start,  
-    
-    output logic pass_start,
-    input  logic pass_ready,
-    input  logic pass_done,
-    
     output logic busy,
     output logic done,
+    
+    input  logic start_pass,
+    output logic pass_done,    
+    
+    output logic start_noc,
+    input  logic noc_done,
+    
+    output logic ofmap_dump,
+    input  logic dump_done,
     output logic bias_sel,
     
+    input  logic [E_WIDTH - 1:0] E,
     input  logic [C_WIDTH - 1:0] C,
     input  logic [M_WIDTH - 1:0] M,
     input  logic [N_WIDTH - 1:0] N,
 
+    input  logic [m_WIDTH - 1:0] m,
     input  logic [n_WIDTH - 1:0] n,
+    input  logic [e_WIDTH - 1:0] e,
     input  logic [p_WIDTH - 1:0] p,
     input  logic [q_WIDTH - 1:0] q, 
     input  logic [r_WIDTH - 1:0] r,
@@ -38,41 +48,52 @@ module Scheduler #(
     output logic [C_WIDTH - 1:0] ifmap_channel_ids [0:1], 
     
     output logic [N_WIDTH - 1:0] psum_ids         [0:1], 
-    output logic [M_WIDTH - 1:0] psum_channel_ids [0:1]  
+    output logic [M_WIDTH - 1:0] psum_channel_ids [0:1]
 );
 
-    typedef enum logic [2:0] {IDLE, CHECK, LOOPING, START_NOC, AWAIT, PASS_DONE, DONE} state_type;
+    typedef enum logic [3:0] {IDLE, CHECK, OUTER_LOOP, INNER_LOOP, START_PASS, PROCESS, PASS_DONE, DUMPING, DONE} state_type;
     state_type state_nxt, state_crnt;
-    
+
+    logic [C_WIDTH - 1:0] C_nxt, C_crnt;
     logic [M_WIDTH - 1:0] M_nxt, M_crnt;
     logic [N_WIDTH - 1:0] N_nxt, N_crnt; 
-    logic [C_WIDTH - 1:0] C_nxt, C_crnt; 
-
+    logic [m_WIDTH - 1:0] m_nxt, m_crnt; 
+    logic [E_WIDTH - 1:0] E_nxt, E_crnt; 
+        
     logic [C_WIDTH - 1:0] channel_ids [0:1];
     
     always_ff @(posedge clk or posedge reset) begin
-        if (reset) begin
+        if (reset) begin 
             state_crnt <= IDLE;
-            N_crnt <= 0;
             C_crnt <= 0;
             M_crnt <= 0;
+            N_crnt <= 0;
+            m_crnt <= 0;
+            E_crnt <= 0; 
         end else begin
             state_crnt <= state_nxt;
-            N_crnt <= N_nxt;
             C_crnt <= C_nxt;
             M_crnt <= M_nxt;
+            N_crnt <= N_nxt;
+            m_crnt <= m_nxt;
+            E_crnt <= E_nxt;
         end
     end
     
     always_comb begin
-        pass_start = 'b0;
-        busy = 'b0;
-        done = 'b0;
+        start_noc = 1'b0;
+        pass_done = 1'b0;
+        busy = 1'b0;
+        done = 1'b0;
+        ofmap_dump = 1'b0;
         
-        M_nxt = M_crnt;
         C_nxt = C_crnt;
+        M_nxt = M_crnt;
         N_nxt = N_crnt;
+        m_nxt = m_crnt;
+        E_nxt = E_crnt;
         state_nxt = state_crnt;
+
         case(state_crnt)
             IDLE:
             begin
@@ -82,49 +103,76 @@ module Scheduler #(
             end
             CHECK:
             begin            
-                if (pass_ready) begin
-                    state_nxt = START_NOC; 
+                if (start_pass) begin
+                    state_nxt = START_PASS; 
                 end
             end
-            LOOPING:
+            INNER_LOOP:
             begin
-                state_nxt = CHECK;
-                if ((M_crnt + (p * t)) >= M) begin 
-                    if ((C_crnt + (q * r)) >= C) begin 
-                        if ((N_crnt + n) >= N) begin 
-                            state_nxt = DONE; 
-                            C_nxt = 0;
-                            M_nxt = 0;
-                            N_nxt = 0;            
-                        end else begin
-                            N_nxt = N_crnt + n;
-                            C_nxt = 0;
-                            M_nxt = 0;
-                        end
+                if ((m_crnt + (p * t)) == m) begin 
+                    m_nxt = 0;
+                    if ((C_crnt + (q * r)) == C) begin 
+                        C_nxt = 0;
+                        state_nxt = DUMPING;
                     end else begin
                         C_nxt = C_crnt + (q * r);
-                        M_nxt = 0;
+                        state_nxt = CHECK;
                     end
                 end else begin
-                    M_nxt = M_crnt + (p * t); 
+                    m_nxt = m_crnt + (p * t);
+                    state_nxt = CHECK;
                 end
             end
-            START_NOC:
+            OUTER_LOOP:
             begin
-                state_nxt = AWAIT;
-                pass_start = 'b1;
-            end
-            AWAIT:
-            begin
-                if (pass_done) begin 
-                    state_nxt = LOOPING; 
+                if (M_crnt + m == M) begin 
+                    M_nxt = 0;
+                    if (E_crnt + e >= E) begin
+                        E_nxt = 0;
+                        if ((N_crnt + n) == N) begin
+                            N_nxt = 0;
+                            state_nxt = DONE;
+                        end else begin
+                            N_nxt = N_crnt + n;
+                            state_nxt = CHECK;
+                        end
+                    end else begin
+                        E_nxt = E_crnt + e;
+                        state_nxt = CHECK;
+                    end
+                end else begin
+                    M_nxt = M_crnt + m;
+                    state_nxt = CHECK;
                 end
-                busy = 'b1;
+            end
+            START_PASS:
+            begin
+                state_nxt = PROCESS;
+                start_noc = 1'b1;
+            end
+            PROCESS:
+            begin
+                if (noc_done) begin 
+                    state_nxt = PASS_DONE; 
+                end
+                busy = 1'b1;
+            end
+            PASS_DONE:
+            begin
+                state_nxt = INNER_LOOP;
+                pass_done = 1'b1;
+            end
+            DUMPING:
+            begin
+                ofmap_dump = 1'b1;
+                if (dump_done) begin 
+                    state_nxt = OUTER_LOOP;
+                end
             end
             DONE:
             begin
                 state_nxt = IDLE;
-                done = 'b1;
+                done = 1'b1;
             end
         endcase
     end
@@ -136,10 +184,16 @@ module Scheduler #(
             ifmap_ids = '{0, 0};
             
             bias_sel = 1'b0;
+        end else if (state_crnt == DUMPING) begin
+            filter_ids = '{M_crnt + 1, M_crnt + m};
+            channel_ids = '{1, C};
+            ifmap_ids = '{N_crnt + 1, N_crnt + n};
+            
+            bias_sel = 1'b0;
         end else begin
-            filter_ids = '{M_crnt, M_crnt + p * t - 1};
-            channel_ids = '{C_crnt, C_crnt + q * r - 1};
-            ifmap_ids = '{N_crnt, N_crnt + n - 1};
+            filter_ids = '{M_crnt + m_crnt + 1, M_crnt + m_crnt + (p * t)};
+            channel_ids = '{C_crnt + 1, C_crnt + (q * r)};
+            ifmap_ids = '{N_crnt + 1, N_crnt + n};
             
             bias_sel = (channel_ids[0] == 0);
         end
@@ -150,5 +204,5 @@ module Scheduler #(
     
     assign psum_ids = ifmap_ids;
     assign psum_channel_ids = filter_ids;
-    
+        
 endmodule

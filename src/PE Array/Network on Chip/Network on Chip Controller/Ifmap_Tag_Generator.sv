@@ -30,7 +30,7 @@ module Ifmap_Tag_Generator
     logic [r_WIDTH - 1:0] r_crnt, r_nxt;
     logic [COL_TAG_WIDTH - 1:0] col_crnt, col_nxt;
     
-    always_ff @(negedge clk or posedge reset) begin
+    always @(negedge clk or posedge reset) begin
         if (reset) begin
             state_crnt <= IDLE;
             r_crnt <= 0;
@@ -46,7 +46,7 @@ module Ifmap_Tag_Generator
         end
     end
 
-    always_comb begin 
+    always @(*) begin 
         // Default assignments    
         state_nxt = state_crnt;        
         r_nxt = r_crnt;
@@ -101,7 +101,7 @@ module Ifmap_Tag_Generator
         endcase
     end
 
-    always_comb begin
+    always @(*) begin
         col_tag = col_crnt;
         row_tag = U_crnt + (r_crnt * 4);
     end

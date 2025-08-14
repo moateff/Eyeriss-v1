@@ -109,7 +109,7 @@ module FIFO #(parameter FIFO_WIDTH = 64, GLB_WIDTH = 16, DEPTH = 16, FIFO_ADDR_W
 	);
 	
 	
-	fifo_mem U_FIFO_MEM
+	fifo_if_mem U_FIFO_MEM
 	(
 	.wclk(wclk),
 	.reset(wreset),

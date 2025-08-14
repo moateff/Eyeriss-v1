@@ -1,19 +1,19 @@
 module ifmap_GLB #(parameter FIFO_WIDTH = 64, DATA_WIDTH = 16, DEPTH = 154588, ADDR = $clog2(DEPTH))
 (
-    input wire core_clk,
+    input wire clk,
 	
-	// port A 
-	input wire [FIFO_WIDTH-1:0] wdata_a,                                       
+	// port A                                        
 	input wire we_a,                                      
 	input wire re_a,                                      
-	input wire [ADDR-1:0] addr_a,                         
+	input wire [ADDR-1:0] addr_a,       
+	input wire [FIFO_WIDTH-1:0] wdata_a,                  
 	output reg [FIFO_WIDTH-1:0] rdata_a,                  
 	
-	// port B
- 	input wire [DATA_WIDTH-1:0] wdata_b,                  
+	// port B                  
 	input wire we_b,                                      
 	input wire re_b,                                     
-	input wire [ADDR-1:0] addr_b,                         
+	input wire [ADDR-1:0] addr_b, 
+	input wire [DATA_WIDTH-1:0] wdata_b,                        
 	output reg [DATA_WIDTH-1:0] rdata_b
 ); 
  
@@ -29,7 +29,7 @@ module ifmap_GLB #(parameter FIFO_WIDTH = 64, DATA_WIDTH = 16, DEPTH = 154588, A
 	wire [DATA_WIDTH-1:0] rdata_b00,rdata_b01,rdata_b10,rdata_b11;
 	
 	flop #(.DATA_WIDTH(ADDR)) dff (
-        .clk(core_clk),
+        .clk(clk),
         .d(addr_b),
         .q(addr_b_r)
     );
@@ -57,9 +57,9 @@ module ifmap_GLB #(parameter FIFO_WIDTH = 64, DATA_WIDTH = 16, DEPTH = 154588, A
 	end
 
 
-	dual_RAM  #(.DATA_WIDTH(DATA_WIDTH), .DEPTH(DEPTH/4)) U0_0
+	dual_BRAM  #(.DATA_WIDTH(DATA_WIDTH), .DEPTH(DEPTH/4)) U0_0
 	(
-    .core_clk(core_clk),
+    .clk(clk),
 		
 	//port A
 	
@@ -79,9 +79,9 @@ module ifmap_GLB #(parameter FIFO_WIDTH = 64, DATA_WIDTH = 16, DEPTH = 154588, A
 	); 
 	
 	
-	dual_RAM  #(.DATA_WIDTH(DATA_WIDTH), .DEPTH(DEPTH/4)) U0_1
+	dual_BRAM  #(.DATA_WIDTH(DATA_WIDTH), .DEPTH(DEPTH/4)) U0_1
 	(
-    .core_clk(core_clk),
+    .clk(clk),
 		
 	//port A
 	
@@ -101,9 +101,9 @@ module ifmap_GLB #(parameter FIFO_WIDTH = 64, DATA_WIDTH = 16, DEPTH = 154588, A
 	); 
 	
 	
-	dual_RAM  #(.DATA_WIDTH(DATA_WIDTH), .DEPTH(DEPTH/4)) U1_0
+	dual_BRAM  #(.DATA_WIDTH(DATA_WIDTH), .DEPTH(DEPTH/4)) U1_0
 	(
-    .core_clk(core_clk),
+    .clk(clk),
 		
 	//port A
 	
@@ -122,9 +122,9 @@ module ifmap_GLB #(parameter FIFO_WIDTH = 64, DATA_WIDTH = 16, DEPTH = 154588, A
 	.rdata_b(rdata_b10)
 	); 
 	
-	dual_RAM  #(.DATA_WIDTH(DATA_WIDTH), .DEPTH(DEPTH/4)) U1_1
+	dual_BRAM  #(.DATA_WIDTH(DATA_WIDTH), .DEPTH(DEPTH/4)) U1_1
 	(
-    .core_clk(core_clk),
+    .clk(clk),
 		
 	//port A
 	
@@ -141,5 +141,6 @@ module ifmap_GLB #(parameter FIFO_WIDTH = 64, DATA_WIDTH = 16, DEPTH = 154588, A
 	.addr_b(addr_b[ADDR-1:2]),
 	.wdata_b(wdata_b),
 	.rdata_b(rdata_b11)
-	); 
+	);
+	 
 endmodule

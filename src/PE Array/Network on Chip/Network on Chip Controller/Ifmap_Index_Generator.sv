@@ -35,7 +35,7 @@ module Ifmap_Index_Generator
     logic [q_WIDTH - 1:0] q_nxt, q_crnt;
     logic [r_WIDTH - 1:0] r_nxt, r_crnt;
         
-    always_ff @(negedge clk or posedge reset) begin
+    always @(negedge clk or posedge reset) begin
         if (reset) begin
             state_crnt <= IDLE;
             n_crnt <= 0;
@@ -53,7 +53,7 @@ module Ifmap_Index_Generator
         end
     end
     
-    always_comb begin
+    always @(*) begin
         // Default assignments
         busy = 1'b0;
         done = 1'b0;
@@ -113,49 +113,6 @@ module Ifmap_Index_Generator
                     end
                 end
             end
-//            OUTER_LOOP:
-//            begin
-//                if (q_crnt == q - 1) begin 
-//                    if (W_crnt == W - 1) begin
-//                        if (n_crnt == n - 1) begin
-//                            state_nxt = DONE;
-//                            n_nxt = 0;
-//                            W_nxt = 0;
-//                            q_nxt = 0;
-//                        end else begin
-//                            state_nxt = INNER_LOOP;
-//                            n_nxt = n_crnt + 1;
-//                            W_nxt = 0;
-//                            q_nxt = 0;
-//                        end
-//                    end else begin
-//                        state_nxt = INNER_LOOP;
-//                        W_nxt = W_crnt + 1;
-//                        q_nxt = 0;
-//                    end
-//                end else begin
-//                    state_nxt = INNER_LOOP;
-//                    q_nxt = q_crnt + 1;
-//                end
-//            end
-//            INNER_LOOP:
-//            begin
-//                if (!await) begin
-//                    busy = 1'b1;
-//                    if (r_crnt == r - 1) begin 
-//                        if (D_crnt == D - 1) begin 
-//                            state_nxt = OUTER_LOOP;
-//                            D_nxt = 0;
-//                            r_nxt = 0;
-//                        end else begin
-//                            D_nxt = D_crnt + 1;
-//                            r_nxt = 0;
-//                        end
-//                    end else begin
-//                        r_nxt = r_crnt + 1; 
-//                    end
-//                end
-//            end
             DONE:
             begin
                 done = 1'b1;
@@ -165,7 +122,7 @@ module Ifmap_Index_Generator
         endcase
     end
     
-    always_comb begin
+    always @(*) begin
         ifmap_index   = n_crnt;
         channel_index = q_crnt + r_crnt * q;
         row_index     = D_crnt;

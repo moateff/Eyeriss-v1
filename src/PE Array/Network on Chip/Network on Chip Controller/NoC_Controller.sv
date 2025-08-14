@@ -1,4 +1,4 @@
-module NoC_Controller
+module noc_controller
 #(
     parameter H_WIDTH = 8,
     parameter W_WIDTH = 8,
@@ -64,10 +64,6 @@ module NoC_Controller
     output filter_done,
     output ipsum_done,
     output opsum_done,
-
-    input [m_WIDTH - 1:0] psum_channel_base,
-    input [E_WIDTH - 1:0] psum_row_base,
-    
 
     output [ADDR_WIDTH-1:0] ifmap_glb_addr,
     output [ADDR_WIDTH-1:0] filter_glb_addr,
@@ -216,7 +212,6 @@ module NoC_Controller
     );
 
     Ipsum_NoC_Controller #(
-        .E_WIDTH(E_WIDTH),
         .F_WIDTH(F_WIDTH),
         .m_WIDTH(m_WIDTH),
         .n_WIDTH(n_WIDTH),
@@ -238,11 +233,7 @@ module NoC_Controller
         .reset(reset),
         .start(start),
         .done(ipsum_done),
-
-        .channel_base(psum_channel_base),
-        .row_base(psum_row_base),
-
-        .E(E),
+        
         .F(F),
         .m(m),
         .n(n),
@@ -267,7 +258,6 @@ module NoC_Controller
     );
     
     Opsum_NoC_Controller #(
-        .E_WIDTH(E_WIDTH),
         .F_WIDTH(F_WIDTH),
         .m_WIDTH(m_WIDTH),
         .n_WIDTH(n_WIDTH),
@@ -289,11 +279,7 @@ module NoC_Controller
         .reset(reset),
         .start(start),
         .done(opsum_done),
-        
-        .channel_base(psum_channel_base),
-        .row_base(psum_row_base),
-        
-        .E(E),
+                
         .F(F),
         .m(m),
         .n(n),

@@ -1,6 +1,7 @@
 module Psum_Index_Generator
 #( 
     parameter F_WIDTH = 6,
+    parameter m_WIDTH = 8,
     parameter n_WIDTH = 3,
     parameter e_WIDTH = 8,
     parameter p_WIDTH = 5,
@@ -16,13 +17,14 @@ module Psum_Index_Generator
     output reg done,
     
     input [F_WIDTH - 1:0] F,
+    input [m_WIDTH - 1:0] m,
     input [n_WIDTH - 1:0] n,
     input [e_WIDTH - 1:0] e,
     input [p_WIDTH - 1:0] p,
     input [t_WIDTH - 1:0] t,
 
     output reg [n_WIDTH - 1:0] psum_index,
-    output reg [p_WIDTH + t_WIDTH - 1:0] channel_index,
+    output reg [m_WIDTH - 1:0] channel_index,
     output reg [e_WIDTH - 1:0] row_index,
     output reg [F_WIDTH - 1:0] col_index
 );
@@ -33,6 +35,7 @@ module Psum_Index_Generator
     state_type state_nxt, state_crnt;
 	
 	logic [F_WIDTH - 1:0] F_nxt, F_crnt;
+    logic [m_WIDTH - 1:0] m_nxt, m_crnt;
     logic [n_WIDTH - 1:0] n_nxt, n_crnt;
     logic [e_WIDTH - 1:0] e_nxt, e_crnt;
     logic [p_WIDTH - 1:0] p_nxt, p_crnt;
@@ -45,7 +48,7 @@ module Psum_Index_Generator
     
     logic lock_nxt, lock_crnt;
 
-	always_ff @(negedge clk or posedge reset) begin
+	always @(negedge clk or posedge reset) begin
         if (reset) begin
             state_crnt <= IDLE;
             F_crnt <= 0;
@@ -77,7 +80,7 @@ module Psum_Index_Generator
         end
     end
 	
-	always_comb begin
+	always @(*) begin
         // Default assignments
         busy = 1'b0;
         done = 1'b0;
@@ -166,15 +169,20 @@ module Psum_Index_Generator
 			DONE:
 			begin
 				done = 1'b1;
+				if (m_crnt + (p * t) == m) begin
+				    m_nxt = 0;
+				end else begin
+				    m_nxt = m_crnt + (p * t);
+				end
                 state_nxt = IDLE;
 			end
 			default: state_nxt = IDLE;
 		endcase
 	end	
 	
-	 always_comb begin
+	 always @(*) begin
         psum_index    = n_crnt;
-        channel_index = p_crnt + (t_crnt * p);
+        channel_index = m_crnt + p_crnt + (t_crnt * p);
         row_index     = e_crnt;
         col_index     = F_crnt;
     end

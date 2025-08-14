@@ -1,6 +1,5 @@
 module Ipsum_NoC_Controller
 #( 
-    parameter E_WIDTH = 6,
     parameter F_WIDTH = 6,
     parameter m_WIDTH = 8,
     parameter n_WIDTH = 3,
@@ -22,11 +21,7 @@ module Ipsum_NoC_Controller
     input  reset,
     input  start,
     output done,
-    
-    input [m_WIDTH - 1:0] channel_base,
-    input [E_WIDTH - 1:0] row_base,
-    
-    input [E_WIDTH - 1:0] E,
+        
     input [F_WIDTH - 1:0] F,
     input [m_WIDTH - 1:0] m,
     input [n_WIDTH - 1:0] n,
@@ -52,7 +47,7 @@ module Ipsum_NoC_Controller
 
     localparam DIM4_WIDTH = n_WIDTH;
     localparam DIM3_WIDTH = m_WIDTH;
-    localparam DIM2_WIDTH = E_WIDTH;  
+    localparam DIM2_WIDTH = e_WIDTH;  
     localparam DIM1_WIDTH = F_WIDTH;
     
     wire [DIM4_WIDTH - 1:0] dim4;
@@ -62,11 +57,11 @@ module Ipsum_NoC_Controller
     
     assign dim4 = n;
     assign dim3 = m;
-    assign dim2 = E;
+    assign dim2 = e;
     assign dim1 = F;
     
     localparam IDX4_WIDTH = n_WIDTH;
-    localparam IDX3_WIDTH = p_WIDTH + t_WIDTH;
+    localparam IDX3_WIDTH = m_WIDTH;
     localparam IDX2_WIDTH = e_WIDTH;
     localparam IDX1_WIDTH = F_WIDTH;
     
@@ -93,6 +88,7 @@ module Ipsum_NoC_Controller
       
     Psum_Index_Generator #(
         .F_WIDTH(F_WIDTH),
+        .m_WIDTH(m_WIDTH),
         .n_WIDTH(n_WIDTH),
         .e_WIDTH(e_WIDTH),
         .p_WIDTH(p_WIDTH),
@@ -107,6 +103,7 @@ module Ipsum_NoC_Controller
         .done(done),
                 
         .F(F),
+        .m(m),
         .n(n),
         .e(e),
         .p(p),
@@ -138,14 +135,14 @@ module Ipsum_NoC_Controller
         .dim1(dim1),
         
         .idx4(idx4),
-        .idx3(channel_base + idx3),
-        .idx2(row_base + idx2),
+        .idx3(idx3),
+        .idx2(idx2),
         .idx1(idx1),
         
         .addr(ipsum_addr)
     );
     
-    assign bias_addr = channel_base + idx3;
+    assign bias_addr = idx3;
        
     fifo_top #(
         .R_DATA_WIDTH(FIFO_OUT_WIDTH),

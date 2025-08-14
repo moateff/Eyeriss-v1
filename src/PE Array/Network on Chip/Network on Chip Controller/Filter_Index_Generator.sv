@@ -48,7 +48,7 @@ module Filter_Index_Generator
     
     logic lock_nxt, lock_crnt;
         
-    always_ff @(negedge clk or posedge reset) begin
+    always @(negedge clk or posedge reset) begin
         if (reset) begin
             state_crnt <= IDLE;
             S_crnt <= 0;
@@ -82,7 +82,7 @@ module Filter_Index_Generator
         end
     end
     
-    always_comb begin
+    always @(*) begin
         // Default assignments
         busy = 1'b0;
         done = 1'b0;
@@ -189,7 +189,7 @@ module Filter_Index_Generator
         endcase
     end
 
-    always_comb begin
+    always @(*) begin
         filter_index  = p_crnt + (t_crnt * p);
         channel_index = q_crnt + (r_crnt * q);
         row_index     = R_crnt;
