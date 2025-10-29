@@ -21,11 +21,10 @@ module scan_chain #(
 )(
     input  wire clk,
     input  wire reset,
-    input  wire se,
-    input  wire si,
-    output wire so,
+    input  wire scan_en,
+    input  wire scan_in,
+    output wire scan_out,
 
-    // Mapping parameters (configurations)
     output  logic  [H_WIDTH - 1:0] H,
     output  logic  [W_WIDTH - 1:0] W,
     output  logic  [R_WIDTH - 1:0] R,
@@ -47,158 +46,158 @@ module scan_chain #(
     output  logic  [t_WIDTH - 1:0] t
 );
 
-    logic [0:15] soi;
+    logic [0:15] scan_w;
 
-    scan_ff_Nbit #(.N(H_WIDTH)) H_reg (
+    scan_ff_Nbit #(.DATA_WIDTH(H_WIDTH)) H_reg (
         .clk(clk),
         .reset(reset),
-        .se(se),
-        .si(si),
+        .scan_en(scan_en),
+        .scan_in(scan_in),
         .q(H),
-        .so(soi[0])
+        .scan_out(scan_w[0])
     );
     
-    scan_ff_Nbit #(.N(W_WIDTH)) W_reg (
+    scan_ff_Nbit #(.DATA_WIDTH(W_WIDTH)) W_reg (
         .clk(clk),
         .reset(reset),
-        .se(se),
-        .si(soi[0]),
+        .scan_en(scan_en),
+        .scan_in(scan_w[0]),
         .q(W),
-        .so(soi[1])
+        .scan_out(scan_w[1])
     );
    
-   scan_ff_Nbit #(.N(R_WIDTH)) R_reg (
+   scan_ff_Nbit #(.DATA_WIDTH(R_WIDTH)) R_reg (
         .clk(clk),
         .reset(reset),
-        .se(se),
-        .si(soi[1]),
+        .scan_en(scan_en),
+        .scan_in(scan_w[1]),
         .q(R),
-        .so(soi[2])
+        .scan_out(scan_w[2])
     );
     
-   scan_ff_Nbit #(.N(S_WIDTH)) S_reg (
+   scan_ff_Nbit #(.DATA_WIDTH(S_WIDTH)) S_reg (
          .clk(clk),
          .reset(reset),
-         .se(se),
-         .si(soi[2]),
+         .scan_en(scan_en),
+         .scan_in(scan_w[2]),
          .q(S),
-         .so(soi[3])
+         .scan_out(scan_w[3])
     );
      
-    scan_ff_Nbit #(.N(E_WIDTH)) E_reg (
+    scan_ff_Nbit #(.DATA_WIDTH(E_WIDTH)) E_reg (
         .clk(clk),
         .reset(reset),
-        .se(se),
-        .si(soi[3]),
+        .scan_en(scan_en),
+        .scan_in(scan_w[3]),
         .q(E),
-        .so(soi[4])
+        .scan_out(scan_w[4])
     );
     
-    scan_ff_Nbit #(.N(F_WIDTH)) F_reg (
+    scan_ff_Nbit #(.DATA_WIDTH(F_WIDTH)) F_reg (
         .clk(clk),
         .reset(reset),
-        .se(se),
-        .si(soi[4]),
+        .scan_en(scan_en),
+        .scan_in(scan_w[4]),
         .q(F),
-        .so(soi[5])
+        .scan_out(scan_w[5])
     );
 
-    scan_ff_Nbit #(.N(C_WIDTH)) C_reg (
+    scan_ff_Nbit #(.DATA_WIDTH(C_WIDTH)) C_reg (
         .clk(clk),
         .reset(reset),
-        .se(se),
-        .si(soi[5]),
+        .scan_en(scan_en),
+        .scan_in(scan_w[5]),
         .q(C),
-        .so(soi[6])
+        .scan_out(scan_w[6])
     );
 
-    scan_ff_Nbit #(.N(M_WIDTH)) M_reg (
+    scan_ff_Nbit #(.DATA_WIDTH(M_WIDTH)) M_reg (
         .clk(clk),
         .reset(reset),
-        .se(se),
-        .si(soi[6]),
+        .scan_en(scan_en),
+        .scan_in(scan_w[6]),
         .q(M),
-        .so(soi[7])
+        .scan_out(scan_w[7])
     );
 
-    scan_ff_Nbit #(.N(N_WIDTH)) N_reg (
+    scan_ff_Nbit #(.DATA_WIDTH(N_WIDTH)) N_reg (
         .clk(clk),
         .reset(reset),
-        .se(se),
-        .si(soi[7]),
+        .scan_en(scan_en),
+        .scan_in(scan_w[7]),
         .q(N),
-        .so(soi[8])
+        .scan_out(scan_w[8])
     );
 
-    scan_ff_Nbit #(.N(U_WIDTH)) U_reg (
+    scan_ff_Nbit #(.DATA_WIDTH(U_WIDTH)) U_reg (
         .clk(clk),
         .reset(reset),
-        .se(se),
-        .si(soi[8]),
+        .scan_en(scan_en),
+        .scan_in(scan_w[8]),
         .q(U),
-        .so(soi[9])
+        .scan_out(scan_w[9])
     );
-    scan_ff_Nbit #(.N(m_WIDTH)) m_reg (
+    scan_ff_Nbit #(.DATA_WIDTH(m_WIDTH)) m_reg (
         .clk(clk),
         .reset(reset),
-        .se(se),
-        .si(soi[9]),
+        .scan_en(scan_en),
+        .scan_in(scan_w[9]),
         .q(m),
-        .so(soi[10])
+        .scan_out(scan_w[10])
     );
 
-    scan_ff_Nbit #(.N(n_WIDTH)) n_reg (
+    scan_ff_Nbit #(.DATA_WIDTH(n_WIDTH)) n_reg (
         .clk(clk),
         .reset(reset),
-        .se(se),
-        .si(soi[10]),
+        .scan_en(scan_en),
+        .scan_in(scan_w[10]),
         .q(n),
-        .so(soi[11])
+        .scan_out(scan_w[11])
     );
 
-    scan_ff_Nbit #(.N(e_WIDTH)) e_reg (
+    scan_ff_Nbit #(.DATA_WIDTH(e_WIDTH)) e_reg (
         .clk(clk),
         .reset(reset),
-        .se(se),
-        .si(soi[11]),
+        .scan_en(scan_en),
+        .scan_in(scan_w[11]),
         .q(e),
-        .so(soi[12])
+        .scan_out(scan_w[12])
     );
 
-    scan_ff_Nbit #(.N(p_WIDTH)) p_reg (
+    scan_ff_Nbit #(.DATA_WIDTH(p_WIDTH)) p_reg (
         .clk(clk),
         .reset(reset),
-        .se(se),
-        .si(soi[12]),
+        .scan_en(scan_en),
+        .scan_in(scan_w[12]),
         .q(p),
-        .so(soi[13])
+        .scan_out(scan_w[13])
     );
 
-    scan_ff_Nbit #(.N(q_WIDTH)) q_reg (
+    scan_ff_Nbit #(.DATA_WIDTH(q_WIDTH)) q_reg (
         .clk(clk),
         .reset(reset),
-        .se(se),
-        .si(soi[13]),
+        .scan_en(scan_en),
+        .scan_in(scan_w[13]),
         .q(q),
-        .so(soi[14])
+        .scan_out(scan_w[14])
     );
 
-    scan_ff_Nbit #(.N(r_WIDTH)) r_reg (
+    scan_ff_Nbit #(.DATA_WIDTH(r_WIDTH)) r_reg (
         .clk(clk),
         .reset(reset),
-        .se(se),
-        .si(soi[14]),
+        .scan_en(scan_en),
+        .scan_in(scan_w[14]),
         .q(r),
-        .so(soi[15])
+        .scan_out(scan_w[15])
     );
 
-    scan_ff_Nbit #(.N(t_WIDTH)) t_reg (
+    scan_ff_Nbit #(.DATA_WIDTH(t_WIDTH)) t_reg (
         .clk(clk),
         .reset(reset),
-        .se(se),
-        .si(soi[15]),
+        .scan_en(scan_en),
+        .scan_in(scan_w[15]),
         .q(t),
-        .so(so)
+        .scan_out(scan_out)
     );
     
 endmodule

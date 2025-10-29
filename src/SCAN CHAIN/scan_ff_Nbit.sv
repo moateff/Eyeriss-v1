@@ -1,29 +1,29 @@
-module scan_ff_Nbit #(parameter N = 4)(
-    input  wire clk,                // Clock
-    input  wire reset,              // Asynchronous active-high reset
-    input  wire se,                 // Scan enable
-    input  wire si,                 // Scan input
-    output wire [N-1 : 0] q,        // Output when scan disabled
-    output wire so                  // Output when scan enabled
+module scan_ff_Nbit #(parameter DATA_WIDTH = 4) (
+    input  wire clk,             
+    input  wire reset,             
+    input  wire scan_en,               
+    input  wire scan_in,                
+    output wire [DATA_WIDTH - 1:0] q,       
+    output wire scan_out                  
 );
     
-    wire [N : 0] soi;
-    assign soi[N] = si;
-    assign so = soi[0];
+    wire [DATA_WIDTH:0] scan_w;
+
+    assign scan_w[DATA_WIDTH] = scan_in;
+    assign scan_out = scan_w[0];
         
     genvar i;
     generate
-    for (i = N - 1; i >= 0; i = i - 1) begin : SCAN_CHAIN
-        scan_ff scan_ff_inst (
-            .clk(clk),          // Connect clock
-            .reset(reset),      // Connect async reset
-            .se(se),            // Scan enable
-            .si(soi[i+1]),      // Scan input
-            .q(q[i]),           // Functional mode output
-            .so(soi[i])         // Scan output
-        );
-    end
+        for (i = DATA_WIDTH - 1; i >= 0; i = i - 1) begin : SCAN_FF
+            scan_ff scan_ff_inst (
+                .clk(clk),          
+                .reset(reset),  
+                .scan_en(scan_en),           
+                .scan_in(scan_w[i+1]),   
+                .q(q[i]),           
+                .scan_out(scan_w[i])         
+            );
+        end
     endgenerate
     
-   
 endmodule

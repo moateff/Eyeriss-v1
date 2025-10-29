@@ -217,7 +217,7 @@ module processing_unit #(
         .scan_out(scan_out)
     );
     
-    noc_top #(
+    noc_wrapper #(
         .H_WIDTH(H_WIDTH),
         .W_WIDTH(W_WIDTH),
         .R_WIDTH(R_WIDTH),

@@ -136,31 +136,31 @@ module pe_array #(
     genvar i, j;
     generate
         for (i = 0; i < NUM_OF_ROWS; i = i + 1) begin : row
-            scan_ff_Nbit #(.N(NUM_OF_COLS)) pe_array_enable_ff (
+            scan_ff_Nbit #(.DATA_WIDTH(NUM_OF_COLS)) pe_array_enable_ff (
                 .clk(clk),
                 .reset(reset),
-                .se(scan_en),
-                .si(scan_w_enable[i]),
+                .scan_en(scan_en),
+                .scan_in(scan_w_enable[i]),
                 .q(enable[i]),
-                .so(scan_w_enable[i+1])
+                .scan_out(scan_w_enable[i+1])
             );
             
-            scan_ff_Nbit #(.N(NUM_OF_COLS)) ipsum_ln_ff (
+            scan_ff_Nbit #(.DATA_WIDTH(NUM_OF_COLS)) ipsum_ln_ff (
                 .clk(clk),
                 .reset(reset),
-                .se(scan_en),
-                .si(scan_w_ipsum_ln_sel[i]),
+                .scan_en(scan_en),
+                .scan_in(scan_w_ipsum_ln_sel[i]),
                 .q(ipsum_ln_sel[i]),
-                .so(scan_w_ipsum_ln_sel[i+1])
+                .scan_out(scan_w_ipsum_ln_sel[i+1])
             );
             
-            scan_ff_Nbit #(.N(NUM_OF_COLS)) opsum_ln_ff (
+            scan_ff_Nbit #(.DATA_WIDTH(NUM_OF_COLS)) opsum_ln_ff (
                 .clk(clk),
                 .reset(reset),
-                .se(scan_en),
-                .si(scan_w_opsum_ln_sel[i]),
+                .scan_en(scan_en),
+                .scan_in(scan_w_opsum_ln_sel[i]),
                 .q(opsum_ln_sel[i]),
-                .so(scan_w_opsum_ln_sel[i+1])
+                .scan_out(scan_w_opsum_ln_sel[i+1])
             );
             
             for (j = 0; j < NUM_OF_COLS; j = j + 1) begin : col
@@ -226,7 +226,7 @@ module pe_array #(
     endgenerate
     
     //------------------------------------------------IFMAP---------------------------------------------\\
-    GIN_FIFO #(
+    gin_wrapper #(
         .DATA_WIDTH(DATA_WIDTH_IFMAP), 
         .ROW_TAG_WIDTH(ROW_TAG_WIDTH_IFMAP), 
         .COL_TAG_WIDTH(COL_TAG_WIDTH_IFMAP),
@@ -247,13 +247,13 @@ module pe_array #(
         .tags_full(ifmap_tags_full),
         .data_wr_en(push_ifmap_to_gin),
         .data_full(ifmap_gin_fifo_full),
-        .se_id(scan_en),
-        .si_id(scan_w[2]),
-        .so_id(scan_w[3])
+        .scan_en_id(scan_en),
+        .scan_in_id(scan_w[2]),
+        .scan_out_id(scan_w[3])
     );
   
     //------------------------------------------------FILTER---------------------------------------------\\
-    GIN_FIFO #(
+    gin_wrapper #(
         .DATA_WIDTH(DATA_WIDTH_FILTER), 
         .ROW_TAG_WIDTH(ROW_TAG_WIDTH_FILTER), 
         .COL_TAG_WIDTH(COL_TAG_WIDTH_FILTER),
@@ -274,13 +274,13 @@ module pe_array #(
         .tags_full(filter_tags_full),
         .data_wr_en(push_filter_to_gin),
         .data_full(filter_gin_fifo_full),
-        .se_id(scan_en),
-        .si_id(scan_w[3]),
-        .so_id(scan_w[4])
+        .scan_en_id(scan_en),
+        .scan_in_id(scan_w[3]),
+        .scan_out_id(scan_w[4])
     );
   
     //-------------------------------------------------IPSUM---------------------------------------------\\
-    GIN_FIFO #(
+    gin_wrapper #(
         .DATA_WIDTH(DATA_WIDTH_PSUM), 
         .ROW_TAG_WIDTH(ROW_TAG_WIDTH_PSUM), 
         .COL_TAG_WIDTH(COL_TAG_WIDTH_PSUM),
@@ -301,13 +301,13 @@ module pe_array #(
         .tags_full(ipsum_tags_full),
         .data_wr_en(push_ipsum_to_gin),
         .data_full(ipsum_gin_fifo_full),
-        .se_id(scan_en),
-        .si_id(scan_w[4]),
-        .so_id(scan_w[5])
+        .scan_en_id(scan_en),
+        .scan_in_id(scan_w[4]),
+        .scan_out_id(scan_w[5])
     );
 
     //-------------------------------------------------OPSUM---------------------------------------------\\
-    GON_FIFO #(
+    gon_wrapper #(
         .DATA_WIDTH(DATA_WIDTH_PSUM),
         .ROW_TAG_WIDTH(ROW_TAG_WIDTH_PSUM),
         .COL_TAG_WIDTH(COL_TAG_WIDTH_PSUM),
@@ -328,9 +328,9 @@ module pe_array #(
         .tags_full(opsum_tags_full),
         .data_rd_en(pop_opsum_from_gon),
         .data_empty(opsum_gon_fifo_empty),
-        .se_id(scan_en),
-        .si_id(scan_w[5]),
-        .so_id(scan_out)
+        .scan_en_id(scan_en),
+        .scan_in_id(scan_w[5]),
+        .scan_out_id(scan_out)
     );
 
 endmodule

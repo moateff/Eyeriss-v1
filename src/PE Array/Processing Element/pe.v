@@ -16,15 +16,10 @@ module pe
     parameter FILTER_SPAD_DEPTH = 224,
     parameter PSUM_SPAD_DEPTH   = 24
 ) (
-    // Clock and Reset
-    input clk,
-    input reset,
-    
-    // Control Signals    
-    // input  configure,
+    input  clk,
+    input  reset,
     output busy, 
             
-    // Configurations
     input [W_WIDTH - 1:0] W,    
     input [S_WIDTH - 1:0] S,    
     input [F_WIDTH - 1:0] F,
@@ -55,16 +50,8 @@ module pe
     localparam IFMAP_ADDR_WIDTH  = $clog2(IFMAP_SPAD_DEPTH);
     localparam FILTER_ADDR_WIDTH = $clog2(FILTER_SPAD_DEPTH);
     localparam PSUM_ADDR_WIDTH   = $clog2(PSUM_SPAD_DEPTH);
-    
-    wire [W_WIDTH - 1:0] W_r;    
-    wire [S_WIDTH - 1:0] S_r;    
-    wire [F_WIDTH - 1:0] F_r;
-    wire [U_WIDTH - 1:0] U_r;
-    wire [n_WIDTH - 1:0] n_r;    
-    wire [p_WIDTH - 1:0] p_r;      
-    wire [q_WIDTH - 1:0] q_r;
      
-    wire [V_WIDTH - 1:0] V_r; 
+    wire [V_WIDTH - 1:0] V; 
     
     wire filter_spad_empty;
     wire ifmap_spad_empty;
@@ -89,7 +76,7 @@ module pe
     wire [DATA_WIDTH - 1:0]       mul_in2;
     wire [(2 * DATA_WIDTH) - 1:0] mul_result;
     
-    wire [DATA_WIDTH - 1:0] truncated_result, truncated_result_r;
+    wire [DATA_WIDTH - 1:0] truncated_result;
     
     wire accumulate_ipsum, accumulate_ipsum_r, accumulate_ipsum_rr;
     wire reset_accumulation, reset_accumulation_r;
@@ -114,45 +101,8 @@ module pe
     wire [p_WIDTH + q_WIDTH + S_WIDTH - 1:0] filter_spad_depth;
     
     wire en_mul, en_mul_r;
-     
-//    flopenr #(W_WIDTH + S_WIDTH + F_WIDTH + U_WIDTH + n_WIDTH + p_WIDTH + q_WIDTH) cfg_inst (
-//        .clk(clk),
-//        .reset(reset),
-//        .en(configure),
-//        .d({W, S, F, U, n, p, q}),
-//        .q({W_r, S_r, F_r, U_r, n_r, p_r, q_r})
-//    );
-
-    assign W_r = W;
-    assign S_r = S;
-    assign F_r = F;
-    assign U_r = U;
-    assign n_r = n;
-    assign p_r = p;
-    assign q_r = q;
     
-    assign ifmap_spad_depth = q_r * S_r;      
-    
-    ifmap_spad #(
-        .DATA_WIDTH(DATA_WIDTH),
-        .MEM_DEPTH(IFMAP_SPAD_DEPTH)
-    ) ifmap_spad_inst (
-        .clk(clk),
-        .reset(reset | reset_ifmap_spad),
-        
-        .spad_depth(ifmap_spad_depth[IFMAP_ADDR_WIDTH - 1:0]),        
-        .shift(shift),
-        
-        .w_en(wr_ifmap),
-        .din(ifmap_pixel),
-        
-        .r_addr(ifmap_addr),
-        .r_en((~zero_flag) & (rd_data)),
-        .dout(ifmap_from_spad),
-        
-        .full(ifmap_spad_full_w),
-        .empty(ifmap_spad_empty)
-    );
+    wire forward;
     
     zero_skipping #(
         .DATA_WIDTH(DATA_WIDTH),
@@ -170,7 +120,30 @@ module pe
         .zero_flag(zero_flag)
     );
     
-    assign filter_spad_depth = p_r * q_r * S_r;
+    assign ifmap_spad_depth = q * S;      
+    
+    ifmap_spad #(
+        .DATA_WIDTH(DATA_WIDTH),
+        .MEM_DEPTH(IFMAP_SPAD_DEPTH)
+    ) ifmap_spad_inst (
+        .clk(clk),
+        .reset(reset | reset_ifmap_spad),
+        
+        .spad_depth(ifmap_spad_depth[IFMAP_ADDR_WIDTH - 1:0]),        
+        .shift(shift),
+        
+        .w_en(wr_ifmap),
+        .din(ifmap_pixel),
+        
+        .r_addr(ifmap_addr),
+        .r_en((~zero_flag) & rd_data),
+        .dout(ifmap_from_spad),
+        
+        .full(ifmap_spad_full_w),
+        .empty(ifmap_spad_empty)
+    );
+
+    assign filter_spad_depth = p * q * S;
 
     filter_spad  #(
         .DATA_WIDTH(DATA_WIDTH),
@@ -184,31 +157,17 @@ module pe
         .w_en(wr_filter),
         .din(filter_pixel),
         
-        .r_en((~zero_flag) & (rd_data)),
+        .r_en((~zero_flag) & rd_data),
         .r_addr(filter_addr),
         .dout(filter_from_spad),
         
         .full(filter_spad_full_w),
         .empty(filter_spad_empty)
     );
-    
-    flopr #(PSUM_ADDR_WIDTH + 3) reg1 (
-        .clk(clk),
-        .reset(reset),
-        .d({psum_addr, wr_psum, accumulate_ipsum, pad}),
-        .q({psum_addr_r, wr_psum_r, accumulate_ipsum_r, pad_r})
-    );
-    
-    flopr #(PSUM_ADDR_WIDTH + 3) reg2 (
-        .clk(clk),
-        .reset(reset),
-        .d({psum_addr_r, wr_psum_r, accumulate_ipsum_r, pad_r}),
-        .q({psum_addr_rr, wr_psum_rr, accumulate_ipsum_rr, pad_rr})
-    );
                 
     psum_spad #(
-           .DATA_WIDTH(DATA_WIDTH),
-           .MEM_DEPTH(PSUM_SPAD_DEPTH)
+        .DATA_WIDTH(DATA_WIDTH),
+        .MEM_DEPTH(PSUM_SPAD_DEPTH)
     ) psum_spad_inst (
         .clk(clk),
         .w_en(wr_psum_rr),
@@ -218,23 +177,9 @@ module pe
         .dout(pusm_from_spad_w)
     );
     
-    mux2x1 #(.DATA_WIDTH(DATA_WIDTH)) mux1 (
-        .in0(pusm_from_spad_w),
-        .in1(sum_result),
-        .sel(wr_psum_rr & (psum_addr_r == psum_addr_rr)),
-        .out(pusm_from_spad)
-    );
-            
-    mux2x1 #(.DATA_WIDTH(DATA_WIDTH)) mux2 (
-        .in0(pusm_from_spad),
-        .in1({DATA_WIDTH{1'b0}}),
-        .sel(reset_accumulation_r),
-        .out(mux1_out)
-    );
-    
-    assign V_r = p_r[1:0] * F_r[1:0];  
+    assign V = p[1:0] * F[1:0];  
 
-    pe_ctrl #(
+    pe_controller #(
         .S_WIDTH(S_WIDTH),
         .F_WIDTH(F_WIDTH),
         .U_WIDTH(U_WIDTH),
@@ -245,20 +190,20 @@ module pe
         .IFMAP_ADDR_WIDTH(IFMAP_ADDR_WIDTH),
         .FILTER_ADDR_WIDTH(FILTER_ADDR_WIDTH),
         .PSUM_ADDR_WIDTH(PSUM_ADDR_WIDTH)
-    ) pe_ctrl_inst (
+    ) pe_controller_inst (
         .clk(clk),
         .reset(reset),
         .start(~spads_empty),
-        .await(spads_empty),
+        .stall(spads_empty),
         .busy(busy),
         
-        .S(S_r),
-        .F(F_r),
-        .U(U_r),
-        .n(n_r),
-        .p(p_r),
-        .q(q_r), 
-        .V(V_r),
+        .S(S),
+        .F(F),
+        .U(U),
+        .n(n),
+        .p(p),
+        .q(q), 
+        .V(V),
         
         .reset_accumulation(reset_accumulation),
         .accumulate_ipsum(accumulate_ipsum),
@@ -278,16 +223,46 @@ module pe
         .opsum_fifo_full(opsum_fifo_full)
     );
     
+    flopr #(PSUM_ADDR_WIDTH + 3) reg1 (
+        .clk(clk),
+        .reset(reset),
+        .d({psum_addr, wr_psum, accumulate_ipsum, pad}),
+        .q({psum_addr_r, wr_psum_r, accumulate_ipsum_r, pad_r})
+    );
+    
+    flopr #(PSUM_ADDR_WIDTH + 3) reg2 (
+        .clk(clk),
+        .reset(reset),
+        .d({psum_addr_r, wr_psum_r, accumulate_ipsum_r, pad_r}),
+        .q({psum_addr_rr, wr_psum_rr, accumulate_ipsum_rr, pad_rr})
+    );
+    
+    assign forward = wr_psum_rr & (psum_addr_r == psum_addr_rr);
+    
+    mux2x1 #(.DATA_WIDTH(DATA_WIDTH)) mux1 (
+        .in0(pusm_from_spad_w),
+        .in1(sum_result),
+        .sel(forward),
+        .out(pusm_from_spad)
+    );
+            
+    mux2x1 #(.DATA_WIDTH(DATA_WIDTH)) mux2 (
+        .in0(pusm_from_spad),
+        .in1({DATA_WIDTH{1'b0}}),
+        .sel(reset_accumulation_r),
+        .out(mux1_out)
+    );
+    
     assign mul_in1 = ifmap_from_spad;  
     assign mul_in2 = filter_from_spad;
     assign en_mul = (~zero_flag) & (rd_data);
     
-    signed_seq_mul #(.PIXEL_WIDTH(DATA_WIDTH)) multiplier_inst (
+    multiplier #(.DATA_WIDTH(DATA_WIDTH)) multiplier_inst (
         .clk(clk),
         .reset(reset), 
         .enable(en_mul_r),
-        .a(mul_in1),
-        .b(mul_in2),
+        .x(mul_in1),
+        .y(mul_in2),
         .product(mul_result)
     );
     
@@ -315,7 +290,7 @@ module pe
     assign adder_in2   = mux1_out_r;
     assign opsum_pixel = (pad_rr == 1'b1) ? 'b0 : sum_result;
     
-    cla #(.width(DATA_WIDTH)) adder_inst (
+    adder #(.DATA_WIDTH(DATA_WIDTH)) adder_inst (
 		.x(adder_in1),
 		.y(adder_in2),
 		.sum(sum_result)

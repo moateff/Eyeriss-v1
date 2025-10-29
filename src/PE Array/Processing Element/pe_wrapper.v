@@ -22,16 +22,11 @@ module pe_wrapper
     parameter FILTER_SPAD_DEPTH = 224,
     parameter PSUM_SPAD_DEPTH   = 24
 ) (
-    // Clock and Reset
-    input clk,   
-    input reset,         
-    
-    // Control Signals
+    input  clk,   
+    input  reset,         
     input  enable,
-    // input  configure,
     output busy,
     
-    // Configurations
     input [W_WIDTH - 1:0] W,    
     input [S_WIDTH - 1:0] S,    
     input [F_WIDTH - 1:0] F,
@@ -89,7 +84,7 @@ module pe_wrapper
     assign pop_filter = (~filter_spad_full) & (~filter_fifo_empty);
     assign pop_ifmap  = (~ifmap_spad_full) & (~ifmap_fifo_empty);
     
-    fifo_top #(
+    sync_fifo #(
         .R_DATA_WIDTH(DATA_WIDTH),
         .W_DATA_WIDTH(DATA_WIDTH_IFMAP),
         .FIFO_DEPTH(IFMAP_FIFO_DEPTH)
@@ -100,13 +95,13 @@ module pe_wrapper
         .read_request(pop_ifmap),
         .wr_data(ifmap),
         .rd_data(ifmap_from_fifo),
-        // .almost_full_flag(),
-        // .almost_empty_flag(),
+        .almost_full_flag(),
+        .almost_empty_flag(),
         .full_flag(ifmap_fifo_full),
         .empty_flag(ifmap_fifo_empty)
     );
     
-    fifo_wrapper #(
+    sync_fifo #(
         .R_DATA_WIDTH(DATA_WIDTH),
         .W_DATA_WIDTH(DATA_WIDTH_FILTER),
         .FIFO_DEPTH(FILTER_FIFO_DEPTH)
@@ -117,13 +112,13 @@ module pe_wrapper
         .read_request(pop_filter),
         .wr_data(filter),
         .rd_data(filter_from_fifo),
-        // .almost_full_flag(),
-        // .almost_empty_flag(),
+        .almost_full_flag(),
+        .almost_empty_flag(),
         .full_flag(filter_fifo_full),
         .empty_flag(filter_fifo_empty)
     );
         
-    fifo_top #(
+    sync_fifo #(
         .R_DATA_WIDTH(DATA_WIDTH),
         .W_DATA_WIDTH(DATA_WIDTH_PSUM),
         .FIFO_DEPTH(PSUM_FIFO_DEPTH)
@@ -134,13 +129,13 @@ module pe_wrapper
         .read_request(pop_ipsum),
         .wr_data(ipsum),
         .rd_data(ipsum_from_fifo),
-        // .almost_full_flag(),
+        .almost_full_flag(),
         .almost_empty_flag(ipsum_fifo_empty),
-        .full_flag(ipsum_fifo_full)
-        // .empty_flag()
+        .full_flag(ipsum_fifo_full),
+        .empty_flag()
     );
     
-    fifo_top #(
+    sync_fifo #(
         .R_DATA_WIDTH(DATA_WIDTH_PSUM),
         .W_DATA_WIDTH(DATA_WIDTH),
         .FIFO_DEPTH(PSUM_FIFO_DEPTH)
@@ -152,8 +147,8 @@ module pe_wrapper
         .wr_data(opsum_to_fifo),
         .rd_data(opsum),
         .almost_full_flag(opsum_fifo_full),
-        // .almost_empty_flag(),
-        // .full_flag(),
+        .almost_empty_flag(),
+        .full_flag(),
         .empty_flag(opsum_fifo_empty)
     );
     
@@ -175,7 +170,6 @@ module pe_wrapper
         .clk(gated_clk),
         .reset(reset),
         .busy(busy),
-        // .configure(configure),
         
         .W(W),
         .S(S),

@@ -1,24 +1,23 @@
-module scan_ff(
-    input  wire clk,      // Clock
-    input  wire reset,    // Asynchronous active-high reset
-    input  wire se,       // Scan enable
-    input  wire si,       // Scan input
-    output wire q,        // Output when scan disabled
-    output wire so        // Output when scan enabled
+module scan_ff (
+    input  wire clk,      
+    input  wire reset,    
+    input  wire scan_en,       
+    input  wire scan_in,
+    // input  wire d,       
+    output wire q,        
+    output wire scan_out        
 );
 
-    reg Dout;
+    reg q_internal;
 
-    // Sequential logic with asynchronous reset
     always @(negedge clk or posedge reset) begin
         if (reset)
-            Dout <= 1'b0;
-        else if (se)
-            Dout <= si;
+            q_internal <= 1'b0;
+        else if (scan_en)
+            q_internal <= /*(~scan_en) ? d :*/scan_in;
     end
 
-    // Output logic
-    and and_gate (q,~se,Dout);
-    assign so = Dout;
+    assign q = (~scan_en) & q_internal;
+    assign scan_out = q_internal;
 
 endmodule

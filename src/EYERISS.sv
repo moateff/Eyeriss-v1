@@ -453,7 +453,7 @@ module eyeriss #(
         The GLB is also used to store the weights and biases of the neural network.
         Consist of 4 buffers:
         ---------------------
-        - ifmap buffer    (ifmap for all layers)
+        - ifmap buffer  (ifmap pixels)
         - filter buffer (filter weights)
         - psum buffer   (ipsum and opsum)
         - bias buffer   (biases of filters)
