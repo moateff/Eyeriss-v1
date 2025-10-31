@@ -1,12 +1,7 @@
 `timescale 1ns / 1ps
 
 import shared_pkg::*;
-import file_pkg::*;
-import cfg_pkg::*;
-import fifo_if_pkg::*;
-import load_pkg::*;
 import test_pkg::*;
-import glb_pkg::*;
 
 module eyeriss_tb;
     

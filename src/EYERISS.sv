@@ -405,7 +405,7 @@ module eyeriss #(
         It is used to store the data that is being transferred between the processing unit and the GLB.
         Asynch to handle different clock domains (core_clk & link_clk).
     --------------------------------------------------------------------------------------------------------------------------*/
-	INTERFACE_UNIT #(
+	interface_unit #(
         .FIFO_WIDTH(FIFO_WIDTH),      
         .GLB_WIDTH(DATA_WIDTH),       
         .DEPTH(FIFO_DEPTH),           
@@ -459,7 +459,7 @@ module eyeriss #(
         - bias buffer   (biases of filters)
     --------------------------------------------------------------------------------------------------------------------------*/    
 
-    GLBs_UNIT #(
+    glb_unit #(
         .FIFO_WIDTH(FIFO_WIDTH), 
         .DATA_WIDTH(DATA_WIDTH),
         .DEPTH_ifmap(IFMAP_GLB_DEPTH),

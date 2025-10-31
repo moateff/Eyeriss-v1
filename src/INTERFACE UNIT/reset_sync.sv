@@ -1,7 +1,7 @@
-module RST_SYNC 
+module reset_sync 
 (
 	input wire  clk, reset,
-	output wire SYNC_RST
+	output wire sync_reset
 );
 
 	reg sync;
@@ -19,6 +19,6 @@ module RST_SYNC
 		end
 	end
 	
-	assign SYNC_RST = !sync;
+	assign sync_reset = !sync;
 	
 endmodule 

@@ -1,4 +1,4 @@
-module FIFO #(parameter FIFO_WIDTH = 64, GLB_WIDTH = 16, DEPTH = 16, FIFO_ADDR_WIDTH = $clog2 (DEPTH), ADDR_WIDTH = 20)
+module async_fifo #(parameter FIFO_WIDTH = 64, GLB_WIDTH = 16, DEPTH = 16, FIFO_ADDR_WIDTH = $clog2 (DEPTH), ADDR_WIDTH = 20)
 (
 	input wire 		wclk,rclk,core_clk,
 	input wire      reset,core_reset,                    								  	
@@ -44,18 +44,18 @@ module FIFO #(parameter FIFO_WIDTH = 64, GLB_WIDTH = 16, DEPTH = 16, FIFO_ADDR_W
 	wire    wreset;
 	wire    rreset;
 	
-	RST_SYNC U_RST_wclk
+	reset_sync U_RST_wclk
 	(
 	.clk(wclk), 
 	.reset(reset),
-	.SYNC_RST(wreset)
+	.sync_reset(wreset)
 	);
 	
-	RST_SYNC U_RST_rclk
+	reset_sync U_RST_rclk
 	(
 	.clk(rclk), 
 	.reset(reset),
-	.SYNC_RST(rreset)
+	.sync_reset(rreset)
 	);
 	
 	// inistantiations
